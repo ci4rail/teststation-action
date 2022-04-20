@@ -33,7 +33,7 @@ runs:
     # Add action's path so that pack.py can be found
     - run: echo "${{ github.action_path }}" >> $GITHUB_PATH
       shell: bash
-    - run: generate-request.py "${{ inputs.pipeline-name }}" "${{ inputs.test-name }}" "${{ inputs.artifacts-override }}" "${{ inputs.artifacts-version }}" > request.json
+    - run: generate-request.py "${{ inputs.pipeline-name }}" "${{ inputs.test-name }}" "${{ inputs.artifact-override }}" "${{ inputs.artifact-version }}" > request.json
       shell: bash
     - name: fetch requester
       uses: dsaltares/fetch-gh-release-asset@master
@@ -42,5 +42,5 @@ runs:
         version: "tags/v1.0.0"
         file: "test-requester-v1.0.0-linux-arm.tar.gz"
         token: ${{ inputs.access-token }}
-    - run: ls -lR
+    - run: ls -lR && cat request.json
       shell: bash
