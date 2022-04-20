@@ -1,0 +1,32 @@
+name: "Teststation test"
+description: "Run a test on test station"
+inputs:
+  mqtt-broker-url:
+    description: "IP:Port of MQTT broker where test station listens to"
+    required: true
+  master-topic:
+    description: "request is published to <master-topic>/request"
+    required: false
+    default: "teststation"
+  test-name:
+    description: "Name of the test to execute (as listed in the schedulers config file)"
+    required: true
+  artifact-override:
+    description: "artifact to test"
+    required: true
+  artifact-version:
+    description: "version of artifact to test"
+    required: true
+  request-timeout:
+    description: "Time in seconds to wait for teststation to become available"
+    required: false
+    default: "3600"
+
+runs:
+  using: "composite"
+  steps:
+    # Add action's path so that pack.py can be found
+    - run: echo "${{ github.action_path }}" >> $GITHUB_PATH
+      shell: bash
+    - run: generate-request.py ${{ inputs.mqtt-broker-url }} ${{ inputs.master-topic }} ${{ inputs.test-name }} ${{ inputs.artifacts-override }} ${{ inputs.artifacts-version }}
+      shell: bash
