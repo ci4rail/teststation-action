@@ -24,12 +24,23 @@ inputs:
     description: "Time in seconds to wait for teststation to become available"
     required: false
     default: "3600"
-
+  access-token:
+    description: "Personal access token for private repos"
+    required: true
 runs:
   using: "composite"
   steps:
     # Add action's path so that pack.py can be found
     - run: echo "${{ github.action_path }}" >> $GITHUB_PATH
       shell: bash
-    - run: generate-request.py ${{ inputs.pipeline-name }} ${{ inputs.mqtt-broker-url }} ${{ inputs.master-topic }} ${{ inputs.test-name }} ${{ inputs.artifacts-override }} ${{ inputs.artifacts-version }}
+    - run: generate-request.py ${{ inputs.pipeline-name }} ${{ inputs.test-name }} ${{ inputs.artifacts-override }} ${{ inputs.artifacts-version }} > request.json
+      shell: bash
+    - name: fetch requester
+      uses: dsaltares/fetch-gh-release-asset@master
+      with:
+        repo: "ci4rail/test-scheduler"
+        version: "tags/v1.0.0"
+        file: "test-requester-v1.0.0-linux-arm.tar.gz"
+        token: ${{ inputs.access-token }}
+    - run: ls -lR
       shell: bash

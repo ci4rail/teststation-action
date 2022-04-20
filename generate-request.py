@@ -3,11 +3,11 @@ import sys
 import os
 import json
 
-if len(sys.argv) != 7:
-    print(f"Usage: {sys.argv[0]} broker topic test_name artifact version")
+if len(sys.argv) != 5:
+    print(f"Usage: {sys.argv[0]} pipeline test_name artifact version")
     sys.exit(1)
 
-pipeline,broker,topic,test_name,artifact,version = sys.argv[1:7]
+pipeline,test_name,artifact,version = sys.argv[1:7]
 
 req = {
     "type": "Run Test",
