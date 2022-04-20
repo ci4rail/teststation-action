@@ -1,6 +1,9 @@
 name: "Teststation test"
 description: "Run a test on test station"
 inputs:
+  pipeline-name:
+    description: "A name identifying the calling pipeline"
+    required: true
   mqtt-broker-url:
     description: "IP:Port of MQTT broker where test station listens to"
     required: true
@@ -28,5 +31,5 @@ runs:
     # Add action's path so that pack.py can be found
     - run: echo "${{ github.action_path }}" >> $GITHUB_PATH
       shell: bash
-    - run: generate-request.py ${{ inputs.mqtt-broker-url }} ${{ inputs.master-topic }} ${{ inputs.test-name }} ${{ inputs.artifacts-override }} ${{ inputs.artifacts-version }}
+    - run: generate-request.py ${{ inputs.pipeline-name }} ${{ inputs.mqtt-broker-url }} ${{ inputs.master-topic }} ${{ inputs.test-name }} ${{ inputs.artifacts-override }} ${{ inputs.artifacts-version }}
       shell: bash
