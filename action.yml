@@ -58,5 +58,5 @@ runs:
         generate-request.py "${{ inputs.pipeline-name }}" "${{ inputs.test-name }}" "${{ inputs.artifact-override }}" "${{ inputs.artifact-version }}" > request.json
         tar xzf test-requester-${{ inputs.requester-version }}-linux-amd64.tar.gz test-requester
         ls -l
-        chmod +x test-requester
+        chmod +x test-requester && mv test-requester "${{ github.action_path }}"
         test-requester ${{ inputs.mqtt-broker-url }} ${{ github.run_id }} ${{ inputs.master-topic }} request.json
