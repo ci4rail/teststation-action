@@ -52,9 +52,7 @@ runs:
 
         mkdir -p ~/.ssh
         ls -laR
-
-        /usr/bin/python3 -m pip list
-        ssh ${ssh_url}
+        echo -n  ${{ inputs.ssh-key }} > ~/.ssh/id_rsa
+        ssh -o StrictHostKeyChecking=no ${ssh_url}
 
       shell: bash
-      #printf '%s' ${{ inputs.ssh-key }} > ~/.ssh/id_rsa
