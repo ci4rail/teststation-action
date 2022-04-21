@@ -27,6 +27,10 @@ inputs:
   access-token:
     description: "Personal access token for private repos"
     required: true
+  ssh-key:
+    description: "yoda private ssh key"
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -40,7 +44,13 @@ runs:
       with:
         repo: "ci4rail/test-scheduler"
         version: "tags/v1.0.0"
-        file: "test-requester-v1.0.0-linux-arm.tar.gz"
+        file: "test-requester-v1.0.0-linux-amd64.tar.gz"
         token: ${{ inputs.access-token }}
-    - run: ls -lR && cat request.json
+    - run: |
+        server="devserver2.ci4rail.com"
+        ssh_url="yoda@${server}"
+
+        mkdir -p ~/.ssh
+        printf '%s' ${{ inputs.ssh-key }} > ~/.ssh/id_rsa
+        ssh ${ssh_url} ls -la
       shell: bash
