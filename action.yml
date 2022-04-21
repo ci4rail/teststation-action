@@ -51,7 +51,9 @@ runs:
         ssh_url="yoda@${server}"
 
         mkdir -p ~/.ssh
-        printf '%s' ${{ inputs.ssh-key }} > ~/.ssh/id_rsa
-        python -m pip list
+        ls -laR
+
+        /usr/bin/python3 -m pip list
 
       shell: bash
+      #printf '%s' ${{ inputs.ssh-key }} > ~/.ssh/id_rsa
