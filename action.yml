@@ -52,6 +52,6 @@ runs:
 
         mkdir -p ~/.ssh
         printf '%s' ${{ inputs.ssh-key }} > ~/.ssh/id_rsa
-        pip3 install paramiko
+        python -m pip list
 
       shell: bash
