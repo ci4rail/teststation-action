@@ -27,8 +27,8 @@ inputs:
   access-token:
     description: "Personal access token for private repos"
     required: true
-  ssh-key:
-    description: "yoda private ssh key"
+  tailscale-key:
+    description: "a emphermeral yoda tailscale key"
     required: true
 
 runs:
@@ -46,14 +46,10 @@ runs:
         version: "tags/v1.0.0"
         file: "test-requester-v1.0.0-linux-amd64.tar.gz"
         token: ${{ inputs.access-token }}
+    - name: Tailscale
+      uses: tailscale/github-action@v1
+      with:
+        authkey: ${{ inputs.tailscale-key }}
     - run: |
-        server="devserver2.ci4rail.com"
-        ssh_url="yoda@${server}"
-
-        mkdir -p ~/.ssh
-        ls -laR
-        printf '%s' "${{ inputs.ssh-key }}" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
-        cat ~/.ssh/id_rsa
-        ssh -o StrictHostKeyChecking=no ${ssh_url} ls -la
-
+        ping 100.71.217.155
       shell: bash
