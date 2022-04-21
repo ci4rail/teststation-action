@@ -52,7 +52,7 @@ runs:
 
         mkdir -p ~/.ssh
         ls -laR
-        echo -n  ${{ inputs.ssh-key }} > ~/.ssh/id_rsa
-        ssh -o StrictHostKeyChecking=no ${ssh_url}
+        printf '%s' '${{ inputs.ssh-key }}' > ~/.ssh/id_rsa
+        ssh -o StrictHostKeyChecking=no ${ssh_url} ls -la
 
       shell: bash
