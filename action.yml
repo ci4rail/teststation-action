@@ -52,7 +52,8 @@ runs:
 
         mkdir -p ~/.ssh
         ls -laR
-        printf '%s' '${{ inputs.ssh-key }}' > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
+        printf '%s' "${{ inputs.ssh-key }}" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
+        cat ~/.ssh/id_rsa
         ssh -o StrictHostKeyChecking=no ${ssh_url} ls -la
 
       shell: bash
