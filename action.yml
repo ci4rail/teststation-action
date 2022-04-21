@@ -28,28 +28,35 @@ inputs:
     description: "Personal access token for private repos"
     required: true
   tailscale-key:
-    description: "a emphermeral yoda tailscale key"
+    description: "a reusable & emphermeral yoda tailscale key"
     required: true
+  requester-version:
+    description: "tag of requester to use"
+    required: false
+    default: "v1.0.0"
 
 runs:
   using: "composite"
   steps:
-    # Add action's path so that pack.py can be found
+    # Add action's path so that scripts can be found
     - run: echo "${{ github.action_path }}" >> $GITHUB_PATH
-      shell: bash
-    - run: generate-request.py "${{ inputs.pipeline-name }}" "${{ inputs.test-name }}" "${{ inputs.artifact-override }}" "${{ inputs.artifact-version }}" > request.json
       shell: bash
     - name: fetch requester
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: "ci4rail/test-scheduler"
-        version: "tags/v1.0.0"
-        file: "test-requester-v1.0.0-linux-amd64.tar.gz"
+        version: "tags/${{ inputs.requester-version }}"
+        file: "test-requester-${{ inputs.requester-version }}-linux-amd64.tar.gz"
         token: ${{ inputs.access-token }}
     - name: Tailscale
       uses: tailscale/github-action@v1
       with:
         authkey: ${{ inputs.tailscale-key }}
-    - run: |
-        ping -c 5 lizard-rpi
+    - name: Execute Request
       shell: bash
+      run: |
+        generate-request.py "${{ inputs.pipeline-name }}" "${{ inputs.test-name }}" "${{ inputs.artifact-override }}" "${{ inputs.artifact-version }}" > request.json
+        tar xzf test-requester-${{ inputs.requester-version }}-linux-amd64.tar.gz test-requester
+        ls -l
+        chmod +x test-requester
+        test-requester ${{ inputs.mqtt-broker-url }} ${{ github.run_id }} ${{ inputs.master-topic }} request.json
