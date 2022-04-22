@@ -65,7 +65,6 @@ runs:
             test-requester ${{ inputs.mqtt-broker-url }} github-${{ github.run_id }} ${{ inputs.master-topic }} request.json 
             status=$?
             set -e
-            echo "status=${status}"
             if [ ${status} = 0 ]; then
                 break
             fi
@@ -78,7 +77,7 @@ runs:
                 echo "timeout waiting for test station"
                 exit 1
             fi
-            echo "wait since ${elapsed_seconds} for test station"
+            echo "waiting since ${elapsed_seconds} seconds for test station"
             sleep 20
         done
         echo "ok"
