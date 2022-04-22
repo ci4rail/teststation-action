@@ -9,10 +9,11 @@ if len(sys.argv) != 4:
 
 pipeline,test_name,artifact_override_json = sys.argv[1:4]
 
+print("artifact_override=<<<%s>>>" % (artifact_override_json))
 artifact_override=json.loads(artifact_override_json)
+print("artifact_override=<<<%s>>>" % (artifact_override))
 
 
-print("artifact_override=<<<%s>>>  <<<%s>>>" % (artifact_override_json, artifact_override))
 
 req = {
     "type": "Run Test",
