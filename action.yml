@@ -77,9 +77,6 @@ runs:
                 exit 1
             fi
             echo "wait since ${elapsed_seconds} for test station"
-            sleep 1
+            sleep 20
         done
         echo "ok"
-
-
-        
