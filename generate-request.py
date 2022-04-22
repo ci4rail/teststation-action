@@ -7,7 +7,7 @@ if len(sys.argv) != 4:
     print(f"Usage: {sys.argv[0]} pipeline test_name artifact_override")
     sys.exit(1)
 
-pipeline,test_name,version_override = sys.argv[1:4]
+pipeline,test_name,artifact_override = sys.argv[1:4]
 
 req = {
     "type": "Run Test",
