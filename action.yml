@@ -56,4 +56,30 @@ runs:
         cat request.json
         tar xzf test-requester-${{ inputs.requester-version }}-linux-amd64.tar.gz test-requester
         chmod +x test-requester && mv test-requester "${{ github.action_path }}"
-        test-requester ${{ inputs.mqtt-broker-url }} github-${{ github.run_id }} ${{ inputs.master-topic }} request.json
+
+        timeout_sec=${{ inputs.request-timeout }}
+        start_time="$(date -u +%s)"
+
+        while true; do
+            test-requester ${{ inputs.mqtt-broker-url }} github-${{ github.run_id }} ${{ inputs.master-topic }} request.json
+            status=$?
+            echo "status=${status}"
+            if [ ${status} = 0 ]; then
+                break
+            fi
+            if [ ${status} != 2 ]; then
+                exit 1
+            fi
+            current_time="$(date -u +%s)"
+            elapsed_seconds=$((${current_time}-${start_time}))
+            if [ ${elapsed_seconds} -gt ${timeout_sec} ]; then
+                echo "timeout waiting for test station"
+                exit 1
+            fi
+            echo "wait since ${elapsed_seconds} for test station"
+            sleep 1
+        done
+        echo "ok"
+
+
+        
