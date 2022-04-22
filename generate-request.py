@@ -9,6 +9,8 @@ if len(sys.argv) != 4:
 
 pipeline,test_name,artifact_override = sys.argv[1:4]
 
+print("artifact_override='%s", artifact_override)
+
 req = {
     "type": "Run Test",
     "user": pipeline,

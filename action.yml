@@ -52,8 +52,8 @@ runs:
     - name: Execute Request
       shell: bash
       run: |
-        generate-request.py "${{ inputs.pipeline-name }}" "${{ inputs.test-name }}" "${{ inputs.artifact-override }}" > request.json
-        cat request.json
-        tar xzf test-requester-${{ inputs.requester-version }}-linux-amd64.tar.gz test-requester
-        chmod +x test-requester && mv test-requester "${{ github.action_path }}"
-        test-requester ${{ inputs.mqtt-broker-url }} github-${{ github.run_id }} ${{ inputs.master-topic }} request.json
+        generate-request.py "${{ inputs.pipeline-name }}" "${{ inputs.test-name }}" "${{ inputs.artifact-override }}"
+        #cat request.json
+        #tar xzf test-requester-${{ inputs.requester-version }}-linux-amd64.tar.gz test-requester
+        #chmod +x test-requester && mv test-requester "${{ github.action_path }}"
+        #test-requester ${{ inputs.mqtt-broker-url }} github-${{ github.run_id }} ${{ inputs.master-topic }} request.json
