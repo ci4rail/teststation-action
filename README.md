@@ -14,12 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     name: test on teststation
     steps:
-      - run: |
-          echo "abcd" > myfile.txt
-          echo `pwd`/myfile.txt
-          hostname
-        shell: bash
-      - uses: ci4rail/teststation-action@initial
+      - uses: ci4rail/teststation-action@v1
         with:
           pipeline-name: "the-pipeline"
           # This name is resolved by tailscale magic DNS
