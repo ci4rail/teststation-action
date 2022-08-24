@@ -30,7 +30,7 @@ inputs:
   requester-version:
     description: "tag of requester to use"
     required: false
-    default: "v1.2.5"
+    default: "v2.0.0"
 
 runs:
   using: "composite"
@@ -62,7 +62,7 @@ runs:
 
         while true; do
             set +e
-            test-requester ${{ inputs.mqtt-broker-url }} github-${{ github.run_id }} ${{ inputs.master-topic }} request.json 
+            test-requester ${{ inputs.mqtt-broker-url }} ${{ inputs.master-topic }} request.json 
             status=$?
             set -e
             if [ ${status} = 0 ]; then
