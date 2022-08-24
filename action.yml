@@ -30,7 +30,7 @@ inputs:
   requester-version:
     description: "tag of requester to use"
     required: false
-    default: "v1.1.0"
+    default: "v1.2.4"
 
 runs:
   using: "composite"
