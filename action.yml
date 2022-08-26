@@ -5,7 +5,7 @@ inputs:
     description: "A name identifying the calling pipeline"
     required: true
   mqtt-broker-url:
-    description: "IP:Port of MQTT broker where test station listens to"
+    description: "URL of MQTT broker where test station listens to (ip:port or proto://ip:port, e.g. tcp://192.168.24.64:1833)"
     required: true
   master-topic:
     description: "request is published to <master-topic>/request"
@@ -20,7 +20,7 @@ inputs:
   request-timeout:
     description: "Time in seconds to wait for teststation to become available"
     required: false
-    default: "3600"
+    default: "600"
   access-token:
     description: "Personal access token for private repos"
     required: true
@@ -30,7 +30,7 @@ inputs:
   requester-version:
     description: "tag of requester to use"
     required: false
-    default: "v2.0.0"
+    default: "v3.0.0"
 
 runs:
   using: "composite"
