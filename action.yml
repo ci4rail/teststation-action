@@ -20,7 +20,7 @@ inputs:
   request-timeout:
     description: "Time in seconds to wait for teststation to become available"
     required: false
-    default: "600"
+    default: "3600"
   access-token:
     description: "Personal access token for private repos"
     required: true
@@ -30,7 +30,7 @@ inputs:
   requester-version:
     description: "tag of requester to use"
     required: false
-    default: "v3.0.0"
+    default: "v3.0.1"
 
 runs:
   using: "composite"
@@ -78,6 +78,6 @@ runs:
                 exit 1
             fi
             echo "waiting since ${elapsed_seconds} seconds for test station"
-            sleep 20
+            sleep 600
         done
         echo "ok"
