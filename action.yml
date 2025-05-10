@@ -30,7 +30,7 @@ inputs:
   requester-version:
     description: "tag of requester to use"
     required: false
-    default: "v3.0.1"
+    default: "v4.4.0"
 
 runs:
   using: "composite"
@@ -58,26 +58,25 @@ runs:
         chmod +x test-requester && mv test-requester "${{ github.action_path }}"
 
         timeout_sec=${{ inputs.request-timeout }}
-        start_time="$(date -u +%s)"
+        set +e
+        set -o pipefail
 
-        while true; do
-            set +e
-            test-requester ${{ inputs.mqtt-broker-url }} ${{ inputs.master-topic }} request.json 
-            status=$?
-            set -e
-            if [ ${status} = 0 ]; then
-                break
-            fi
-            if [ ${status} != 2 ]; then
-                exit 1
-            fi
-            current_time="$(date -u +%s)"
-            elapsed_seconds=$((${current_time}-${start_time}))
-            if [ ${elapsed_seconds} -gt ${timeout_sec} ]; then
-                echo "timeout waiting for test station"
-                exit 1
-            fi
-            echo "waiting since ${elapsed_seconds} seconds for test station"
-            sleep 600
-        done
-        echo "ok"
+        test-requester -busytimeout ${timeout_sec} ${{ inputs.mqtt-broker-url }} ${{ inputs.master-topic }} request.json | tee output.txt; rc=$?;
+        set -e
+        if [[ $rc == 1 ]]; then
+          echo "ERROR Test Failed -> Store Logs as Artifacts"
+          URL=$(cat output.txt | awk '/LOG_URL: /{print $2}')
+          echo "URL $URL"
+          # curl -o report.tgz $URL
+          # mkdir -p results
+          # tar -xzf report.tgz -C results
+          exit 1
+        elif [[ $rc == 2 ]]; then
+          echo "ERROR Test Station Busy"
+          exit 2
+        elif [[ $rc == 3 ]]; then
+          echo "ERROR Request Invalid"
+          exit 3
+        else
+          echo "Test PASS"
+        fi
