@@ -2,7 +2,6 @@
 
 This Github action allows you to test software components on a testfarm test station.
 
-Note: this action is used by [fw-esp-action](https://github.com/ci4rail/fw_esp-action).
 
 ## Usage
 
@@ -29,6 +28,9 @@ jobs:
               \"desired_versions.iou01_1.source.filetype\": \"fwpkg\"
             }
           access-token: ${{ secrets.FW_CI_TOKEN }}
-          # must be a reusable, emphemeral key!
           tailscale-key: ${{ secrets.YODA_TAILSCALE_AUTHKEY }}
+          request-timeout: "7200"
+          minio_access_key: ${{ secrets.MINIO_ACCESS_KEY }}
+          minio_secret_key: ${{ secrets.MINIO_SECRET_KEY }}
+
 ```
