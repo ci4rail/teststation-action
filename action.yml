@@ -49,8 +49,10 @@ runs:
       uses: tailscale/github-action@v1
       with:
         authkey: ${{ inputs.tailscale-key }}
-    - name: Execute Request
+    - name: Run Test
+      id: run_test
       shell: bash
+      continue-on-error: true  # continue on error to upload logs
       run: |
         generate-request.py "${{ inputs.pipeline-name }}" "${{ inputs.test-name }}" "${{ inputs.artifact-override }}" > request.json
         cat request.json
@@ -64,19 +66,45 @@ runs:
         test-requester -busytimeout ${timeout_sec} ${{ inputs.mqtt-broker-url }} ${{ inputs.master-topic }} request.json | tee output.txt; rc=$?;
         set -e
         if [[ $rc == 1 ]]; then
-          echo "ERROR Test Failed -> Store Logs as Artifacts"
-          URL=$(cat output.txt | awk '/LOG_URL: /{print $2}')
-          echo "URL $URL"
-          # curl -o report.tgz $URL
-          # mkdir -p results
-          # tar -xzf report.tgz -C results
-          exit 1
+          echo "ERROR Test Failed"
         elif [[ $rc == 2 ]]; then
           echo "ERROR Test Station Busy"
-          exit 2
         elif [[ $rc == 3 ]]; then
           echo "ERROR Request Invalid"
-          exit 3
         else
           echo "Test PASS"
         fi
+        echo "EXIT_CODE=$rc" >> $GITHUB_ENV
+        exit $rc
+
+    - name: Download file from MinIO
+      if: env.EXIT_CODE == '1'
+      env:
+        MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
+        MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y s3cmd
+
+        cat > ~/.s3cfg <<EOF
+        [default]
+        access_key = $MINIO_ACCESS_KEY
+        secret_key = $MINIO_SECRET_KEY
+        host_base = minio.ci4rail.com
+        host_bucket = minio.ci4rail.com
+        use_https = True
+        signature_v2 = False
+        EOF
+
+        URL=$(cat output.txt | awk '/LOG_URL: /{print $2}')
+        echo "S3 URL: $URL"
+        mkdir -p results
+        s3cmd get $URL results/
+
+    - name: Upload test results
+      if: env.EXIT_CODE == '1'
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: results/*
+        retention-days: 90
