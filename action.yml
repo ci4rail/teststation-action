@@ -107,7 +107,7 @@ runs:
         mkdir -p results results_tar
         s3cmd get $URL results_tar/
         # Extract the tar file because artifact will be zipped
-        tar xf results_tar/*.tar.gz -C results
+        tar xf results_tar/* -C results
 
     - name: Upload test results
       if: env.EXIT_CODE == '1'
@@ -117,7 +117,7 @@ runs:
         path: results/*
         retention-days: 90
 
-    - name: Ensure job fails
+    - name: Ensure job fails if test failed
       if: env.EXIT_CODE == '1'        
       shell: bash
       run: exit 1
