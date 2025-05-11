@@ -30,7 +30,12 @@ inputs:
   requester-version:
     description: "tag of requester to use"
     required: false
-    default: "v3.0.1"
+    default: "v4.4.0"
+  minio_access_key:
+    required: true
+  minio_secret_key:
+    required: true
+
 
 runs:
   using: "composite"
@@ -49,8 +54,10 @@ runs:
       uses: tailscale/github-action@v1
       with:
         authkey: ${{ inputs.tailscale-key }}
-    - name: Execute Request
+    - name: Run Test
+      id: run_test
       shell: bash
+      continue-on-error: true  # continue on error to upload logs
       run: |
         generate-request.py "${{ inputs.pipeline-name }}" "${{ inputs.test-name }}" "${{ inputs.artifact-override }}" > request.json
         cat request.json
@@ -58,26 +65,59 @@ runs:
         chmod +x test-requester && mv test-requester "${{ github.action_path }}"
 
         timeout_sec=${{ inputs.request-timeout }}
-        start_time="$(date -u +%s)"
+        set +e
+        set -o pipefail
 
-        while true; do
-            set +e
-            test-requester ${{ inputs.mqtt-broker-url }} ${{ inputs.master-topic }} request.json 
-            status=$?
-            set -e
-            if [ ${status} = 0 ]; then
-                break
-            fi
-            if [ ${status} != 2 ]; then
-                exit 1
-            fi
-            current_time="$(date -u +%s)"
-            elapsed_seconds=$((${current_time}-${start_time}))
-            if [ ${elapsed_seconds} -gt ${timeout_sec} ]; then
-                echo "timeout waiting for test station"
-                exit 1
-            fi
-            echo "waiting since ${elapsed_seconds} seconds for test station"
-            sleep 600
-        done
-        echo "ok"
+        test-requester -busytimeout ${timeout_sec} ${{ inputs.mqtt-broker-url }} ${{ inputs.master-topic }} request.json | tee output.txt; rc=$?;
+        set -e
+        if [[ $rc == 1 ]]; then
+          echo "ERROR Test Failed"
+        elif [[ $rc == 2 ]]; then
+          echo "ERROR Test Station Busy"
+        elif [[ $rc == 3 ]]; then
+          echo "ERROR Request Invalid"
+        else
+          echo "Test PASS"
+        fi
+        echo "EXIT_CODE=$rc" >> $GITHUB_ENV
+        exit $rc
+
+    - name: Download file from MinIO
+      if: env.EXIT_CODE == '1'
+      env:
+        MINIO_ACCESS_KEY: ${{ inputs.minio_access_key }}
+        MINIO_SECRET_KEY: ${{ inputs.minio_secret_key }}
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y s3cmd
+
+        cat > ~/.s3cfg <<EOF
+        [default]
+        access_key = $MINIO_ACCESS_KEY
+        secret_key = $MINIO_SECRET_KEY
+        host_base = minio.ci4rail.com
+        host_bucket = minio.ci4rail.com
+        use_https = True
+        signature_v2 = False
+        EOF
+
+        URL=$(cat output.txt | awk '/LOG_URL: /{print $2}')
+        echo "S3 URL: $URL"
+        mkdir -p results results_tar
+        s3cmd get $URL results_tar/
+        # Extract the tar file because artifact will be zipped
+        tar xf results_tar/* -C results
+
+    - name: Upload test results
+      if: env.EXIT_CODE == '1'
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: results/*
+        retention-days: 90
+
+    - name: Ensure job fails if test failed
+      if: env.EXIT_CODE == '1'        
+      shell: bash
+      run: exit 1
