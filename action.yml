@@ -53,6 +53,7 @@ runs:
     - name: Tailscale
       uses: tailscale/github-action@v1
       with:
+        version: "1.94.1"
         authkey: ${{ inputs.tailscale-key }}
     - name: Run Test
       id: run_test
